@@ -1,3 +1,5 @@
+NEXT: L43
+
 cargo new <name> --bin
 
 - [x] Set Env File in Rust
@@ -15,6 +17,10 @@ cargo new <name> --bin
 
 - [x] Use unimplemented!() macro for functions you are not ready to implement yet. However, it cannot be used in production because it will panic
 
+_Request_
+
+- [ ] Result can always use the shortcut operator?
+
 _Method_
 
 - [ ] Why need to parse method?
@@ -22,3 +28,13 @@ _Method_
 - [ ] Why need to implement From<MethodError>, From<Utf8Error>, Display and Debug for ParseError?
 
 - [ ] Why use empty struct for MethodError?
+
+- [ ] // unwrap()
+      // expect()
+      // match()
+      // ?
+      // unwrap_or()
+
+- [ ] When to use Err(ParseError::InvalidRequest) and when just use ParseError::InvalidRequest
+
+[http://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html]

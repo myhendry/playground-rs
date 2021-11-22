@@ -2,13 +2,7 @@ use std::convert::{TryFrom};
 
 use std::net::TcpListener;
 use std::io::{Read};
-use crate::http::{Method, Request};
-
-// unwrap()
-// expect()
-// match()
-// ?
-// unwrap_or()
+use crate::http::{ Request};
 
 pub struct Server {
 	addr: String,
