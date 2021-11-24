@@ -9,6 +9,7 @@ pub enum Method {
 }
 
 // Need to implement this Trait FromStr to use the parse method
+// This is for conversion of the string slice to Option Method
 impl FromStr for Method {	
 	type Err = MethodError;
 
@@ -24,4 +25,7 @@ impl FromStr for Method {
 }
 
 // todo Why use empty struct for MethodError?
+// this needs to be public as from_str is public
 pub struct MethodError;
+
+

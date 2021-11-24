@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 use std::str::{self, Utf8Error};
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::error::Error;
-use super::method::Method;
+use super::method::{Method, MethodError};
 
 #[derive(Debug)]
 pub struct Request<'buf> {
@@ -63,7 +63,42 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 		}
 
 		// todo why need to parse method?
-		let method = method.parse()?;
+		// convert string slice to Method enum
+		// when use the FromStr Trait, it provides the parse method for free
+		let method: Method = method.parse()?;
+
+		// + 1 means plus one byte not one character
+		// we know at this index, there is a question mark which is one byte so it is fine and wouldnt throw an error
+		let mut query_string = None;
+
+		// * OPTION 1
+		// match  path.find('?') {
+		// 	Some(i) => {
+		// 		query_string = Some(&path[i+1..]);
+		// 		path = &path[..i]
+		// 	},
+		// 	None => {}
+		// }
+
+		// * OPTION 2
+		// let q = path.find("?");
+		// if q.is_some() {
+		// 	// unwrap will panic which is not elegant
+		// 	// but because we have wrapped it with is_some(), it is fine
+		// 	// cause we have done the check
+		// 	let i = q.unwrap();
+		// 	query_string = Some(&path[i+1..]);
+		// 	path = &path[..i]
+
+		// } 
+
+		// OPTION 3 (BEST SOLUTION)
+		// we use if Let because we only care about the Some arm and not care about the None arm
+		// Rust has the if Let to make it easier for coders
+		if let Some(i) = path.find('?') {
+			query_string = Some(&path[i+1..]);
+			path = &path[..i]	
+		}
 
 		Ok(Self {
 			path: "fasdf",
@@ -113,10 +148,17 @@ impl ParseError {
 	}
 }
 
-// !
+// ! used inside str::from_utf8(buf)?;
 impl From<Utf8Error> for ParseError {
 	fn from(_: Utf8Error) -> Self {
 		Self::InvalidEncoding
+	}
+}
+
+// ! used inside let method: Method = method.parse()?;
+impl From<MethodError> for ParseError {
+	fn from(_: MethodError) -> Self {
+		Self::InvalidMethod	
 	}
 }
 
