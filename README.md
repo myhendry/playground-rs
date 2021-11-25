@@ -1,3 +1,5 @@
+UDEMY: Learn Rust by Building Real Applications
+
 NEXT: L48
 
 cargo new <name> --bin
