@@ -1,4 +1,4 @@
-UDEMY: Learn Rust by Building Real Applications
+Learn Rust by Building Real Applications (UDEMY)
 
 NEXT: L48
 
