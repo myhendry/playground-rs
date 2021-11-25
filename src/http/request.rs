@@ -100,6 +100,9 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 			path = &path[..i]	
 		}
 
+		// Drawbacks of passing as Strings rather than string slice
+		// though returning values as string slices might mean need to implement lifetimes
+		// More efficient
 		Ok(Self {
 			path: "fasdf",
 			method: Method::GET,

@@ -1,4 +1,4 @@
-NEXT: L45
+NEXT: L48
 
 cargo new <name> --bin
 

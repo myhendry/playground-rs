@@ -66,6 +66,11 @@ impl Server {
 							*/	
 							// &buffer[..].try_into();			
 							// let res: &Result<Request, _> = &buffer[..].try_into();			
+							// this will create a relationship between buffer and request
+							// request will have a relationship with the buffer
+							// lifetime tool to guarantee memory safety
+							// communicate to the compiler some references are related to the same memory and are expected to share the same lifetimes
+							// Specifying a lifetime does not allow us to choose how long a value will live
 							match Request::try_from(&buffer[..]) {
 								Ok(_) => {},
 								Err(e) => println!("Failed to parse the request: {}", e),
