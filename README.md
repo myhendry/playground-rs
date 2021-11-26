@@ -1,6 +1,6 @@
 Learn Rust by Building Real Applications (UDEMY)
 
-NEXT: L48
+NEXT: L50
 
 cargo new <name> --bin
 
@@ -77,3 +77,81 @@ In examples and quick 'n' dirty code. Sometimes you're writing examples or a qui
 When panicking indicates a bug in the program. When the invariants of your code should prevent a certain case from happening (like, say, popping from an empty stack), then panicking can be permissible. This is because it exposes a bug in your program. This can be explicit, like from an assert! failing, or it could be because your index into an array was out of bounds.
 
 expect does exactly the same thing as unwrap, except it prints a message you give to expect. This makes the resulting panic a bit nicer to deal with, since it will show your message instead of “called unwrap on a None value.”
+
+## Rust
+
+not mandatory to have new() constructor
+
+to use the Trait, need to pull the Trait into the module
+
+to explicitly convert a slice into byte slice (as using Try_From is generic, it cannot infer the type and do automatic conversion)...
+
+```
+// Method 1
+Request::try_from(&buffer as &[u8]);
+
+// Method 2
+Request::try_from(&buffer[..]);
+```
+
+### Error Handling
+
+[Error Handling in Rust - Let's Get Rusty YouTube](https://youtu.be/wM6o70NAWUI) \
+
+[To Panic or not to Panic](https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html) \
+
+[Recoverable Errors with Result](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html)
+
+// Unlike other languages, Rust differentiates between Recoverable and Unrecoverable Errors
+
+// Use panic only in exceptional circumstances when cannot recover from the error
+**Irrecoverable Error**
+
+# panic!("crash and burn");
+
+in terminal, RUST_BACKTRACE=1 cargo run()
+
+# unwrap();
+
+expect(<'custom error message'>);
+
+It's the situation your code is in, that makes the difference. If your code cannot meaningfully continue without the unwrapped value, choose expect() . If you can respond to there not being a value, pick unwrap() instead, after verifying the value's existence
+
+---
+
+**Recoverable Error**
+
+# match Result<File, Error> ...
+
+# ? = A Shortcut for Propagating Errors to the Calling Code
+
+the ? Operator. The calling code will then decide to panic or do something else eg using default file or default username etc
+
+# ok_or = Transforms the Option<T> into a Result<T, E>
+
+let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?; // Transforms the Option<T> into a Result<T, E>, mapping Some(v) to Ok(v) and None to Err(err) THEN uses the ? operator to 'unwrap' the result
+
+# if let Some(i)... Since we care only about a single variant (Some) and can safely ignore other variant (None), then we can use if let rather than match or x.if_some(), if let Some(i) makes the code cleaner
+
+## Arrays & Vectors
+
+```
+// Arrays [T, N] fixed length
+
+let a = [1, 2, 3]; 	// [i32, 3]
+a.length;
+a.iter();
+
+// Vectors Vec<T> or [T] growable
+let v = vec![1, 2, 3];
+v.length;
+v.iter();
+
+```
+
+!Fundamentals of the Rust Programming Language (Udemy)
+
+**What kind of Trait to use?**
+
+**Cannot find cargo.toml file**
+cargo init .

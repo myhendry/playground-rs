@@ -3,12 +3,12 @@ use std::str::{self, Utf8Error};
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::error::Error;
 use super::method::{Method, MethodError};
-
+use super::{QueryString, QueryStringValue};
 #[derive(Debug)]
 pub struct Request<'buf> {
 	path: &'buf str,
-	pub query_string: Option<&'buf str>,
-	pub method: Method,
+	query_string: Option<QueryString<'buf>>,
+	method: Method,
 }
 
 impl<'buf> Request<'buf> {
@@ -18,7 +18,7 @@ impl<'buf> Request<'buf> {
 impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 	type Error = ParseError;
 
-	fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
+	fn try_from(buf: &'buf [u8]) -> Result<Self, Self::Error> {
 		// Result<&str, Utf8Error>
 		// Putting ?, returns &str
 		// convert utf8 &[u8] to &str
@@ -96,17 +96,19 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 		// we use if Let because we only care about the Some arm and not care about the None arm
 		// Rust has the if Let to make it easier for coders
 		if let Some(i) = path.find('?') {
-			query_string = Some(&path[i+1..]);
-			path = &path[..i]	
+			// query_string = Some(&path[i+1..]);
+			query_string = Some(QueryString::from(&path[i+1..]));
+			path = &path[..i];
 		}
 
 		// Drawbacks of passing as Strings rather than string slice
 		// though returning values as string slices might mean need to implement lifetimes
 		// More efficient
 		Ok(Self {
-			path: "fasdf",
-			method: Method::GET,
-			query_string: Some("fasdfadf"),
+			path,
+			method,
+			query_string
+
 		})
 	}
 }
