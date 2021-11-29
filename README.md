@@ -1,6 +1,6 @@
 Learn Rust by Building Real Applications (UDEMY)
 
-NEXT: L50
+NEXT: L54
 
 cargo new <name> --bin
 

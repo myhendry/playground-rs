@@ -1,8 +1,8 @@
 use std::convert::{TryFrom};
 
 use std::net::TcpListener;
-use std::io::{Read};
-use crate::http::{ Request};
+use std::io::{Read, Write};
+use crate::http::{ Request, Response, StatusCode};
 
 pub struct Server {
 	addr: String,
@@ -71,10 +71,39 @@ impl Server {
 							// lifetime tool to guarantee memory safety
 							// communicate to the compiler some references are related to the same memory and are expected to share the same lifetimes
 							// Specifying a lifetime does not allow us to choose how long a value will live
-							match Request::try_from(&buffer[..]) {
-								Ok(_) => {},
-								Err(e) => println!("Failed to parse the request: {}", e),
-							}	
+							let response = match Request::try_from(&buffer[..]) {
+								Ok(request) => {
+									Response::new(StatusCode::Ok, None)	
+
+									// Here is write! to the stream
+									// For response to implement the write macro to write to the stream, 
+									// it needs to implement the Display Trait
+									// write!(TARGET, PLACEHOLDER,CONTENT);  
+									//write!(stream, "{}", response);
+									 
+									// Both below methods return an IoResult which needs to be handled
+									// It would be nicer if they can be handled together and no need to duplicate
+									// response.send(&mut stream);
+
+								},
+								Err(e) => { 
+									println!("Failed to parse the request: {}", e);
+
+									/*
+										unused `Result` that must be used
+										`#[warn(unused_must_use)]` on by default
+										this `Result` may be an `Err` variant, which should be handled		
+									*/
+									// Response::new(StatusCode::BadRequest, None).send(&mut stream);
+									Response::new(StatusCode::BadRequest, None)
+
+
+								}
+							};
+							
+							if let Err(e) = response.send(&mut stream) {
+								println!("Failed to send response: {}", e);
+							}
 						},
 						Err(e) => println!("Failed to read from connection: {:?}", e),
 					}
