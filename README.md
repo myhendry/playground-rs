@@ -1,6 +1,6 @@
 Learn Rust by Building Real Applications (UDEMY)
 
-NEXT: L54
+NEXT: L56
 
 cargo new <name> --bin
 
@@ -155,3 +155,72 @@ v.iter();
 
 **Cannot find cargo.toml file**
 cargo init .
+
+## STRINGS
+
+&str: just to view it
+
+String: own & manipulate it
+
+```
+let s1 = "hello";                         // &str
+let s2 = String::from("hello world");     // &str -> String
+let s3 = "Hello World".to_string();       // &str -> String
+let s4 = "Hey World".to_owned();          // &str -> String
+let s5 = &s4[..];                         // String -> &str
+
+// Manipulating Strings
+let s6 = String::from("foo");
+s6.push_str("bar");                       // String -> String
+s6.replace_range(..., "baz");             // String -> String
+
+// Concantenating Strings
+let s7 = String::from("Hello, ");
+let s8 = String::from("World");
+let s9 = s7 + &s8;                        // String + &str -> String // s7 moved
+
+let s10 = String::from("Hello, ");
+let s11 = String::from("World");
+let s12 = format!("{} {} {}", s10, s11, "toe");     // String + String + &str -> String // format macro not as efficient as will copy. format macro can take String or &str
+
+let s13 = ["first", "second"].concat();    // &str + &str -> String
+let s14 = format!("{} {}", "first", "second");  // &str + &str -> String
+let s15 = concat!("first", "second");     // &str + &str -> &str
+
+let s16 = String::from("test");
+let s17 = s16 + "okok";                   // String + &str -> String
+
+// Indexing into String
+let s18 = "👏👏👏👏👏👏👏👏";
+let s19 = &s18[0..4];                     // if using emoji, will be 4 bytes
+
+// Rust uses utf-8 for its character encoding
+1     // 1 byte
+2     // 1 byte
+😼    // 4 bytes
+
+for b in "👏👏👏👏👏👏👏👏".bytes() {
+      println!("{}", b);
+}
+
+for c in "👏👏👏👏👏👏👏👏".chars() {
+      println!("{}", c);
+}
+
+use unicode_segmentation::UnicodeSegmentation;
+for g in "👏👏👏👏👏👏👏👏".graphemes(is_extended: true) {
+      println!("{}", g);
+}
+
+// Strings in Functions
+let s20 = "Hello World";
+let s21 = String::from("Hello World");
+
+my_function(s20);                   // BOTH OK (to pass in Strings or string slices due to deref coercion)
+my_function(&s21);                   // BOTH OK (to pass in Strings or string slices due to deref coercion)
+
+fn my_function(a: &str) -> String {
+      return format!("{}", a);
+}
+
+```

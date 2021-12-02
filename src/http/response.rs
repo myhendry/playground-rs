@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Formatter, Result as FmtResult}, net::TcpStream};
+use std::{fmt::{Display, Formatter, Result as FmtResult}, net::{TcpStream, TcpListener}};
 use std::io::{Write, Read, Result as IoResult};
 use super::StatusCode;
 
@@ -20,7 +20,19 @@ impl Response {
 		}
 	}
 
-	pub fn send(&self, stream: &mut TcpStream) -> IoResult<()> {
+	// implementing the Write Trait Object to make it more flexible - Generic
+	// it can accept any parameters that implement the Write Trait
+
+	// Static vs Dynamic Dispatch
+	// dynamic dispatch uses 'dyn' which stands for dynamic eg dyn stream: &mut dyn Write
+	// There will be run time cost when using dyn because it will search for the appropriate method to use during runtime
+	// static dispatch uses 'impl' eg stream: &mut impl Write
+	// it will resolve during compile time hence there is no run time cost associated with it contrast to dynamic dispatch
+	// compilation will take longer and the file size will be larger
+
+	pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
+	
+		// todo why need to use &self.body here and not just self?
 		let body = match &self.body {
 			Some(b) => b,
 			None => "",

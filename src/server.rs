@@ -2,11 +2,25 @@ use std::convert::{TryFrom};
 
 use std::net::TcpListener;
 use std::io::{Read, Write};
+use crate::http::request::ParseError;
 use crate::http::{ Request, Response, StatusCode};
+
+
+// ! L59 Traits can provide for default implementations
+// in event caller does not implement
+pub trait Handler {
+	fn handle_request(&mut self, request: &Request) -> Response;
+	
+	fn handle_bad_request(&mut self, e: &ParseError) -> Response {
+		println!("Failed to parse request: {}", e);
+		Response::new(StatusCode::BadRequest, None)
+	}
+}
 
 pub struct Server {
 	addr: String,
 }
+
 
 impl Server {
 	pub fn new(addr: String) -> Self {
@@ -15,7 +29,7 @@ impl Server {
 		}
 	}
 
-	pub fn run(&self) {
+	pub fn run(&self, mut handler: impl Handler) {
 		// Unwrap will panic if no result found and will log error to the screen
 		// If unwrap ok, it will return the result
 	 	// If double binding (connect to address already in use), this line will panic
@@ -73,7 +87,7 @@ impl Server {
 							// Specifying a lifetime does not allow us to choose how long a value will live
 							let response = match Request::try_from(&buffer[..]) {
 								Ok(request) => {
-									Response::new(StatusCode::Ok, None)	
+									
 
 									// Here is write! to the stream
 									// For response to implement the write macro to write to the stream, 
@@ -85,6 +99,9 @@ impl Server {
 									// It would be nicer if they can be handled together and no need to duplicate
 									// response.send(&mut stream);
 
+									// ! L55 Using Custom Traits
+									// Response::new(StatusCode::Ok, None)
+									handler.handle_request(&request)
 								},
 								Err(e) => { 
 									println!("Failed to parse the request: {}", e);
@@ -95,7 +112,10 @@ impl Server {
 										this `Result` may be an `Err` variant, which should be handled		
 									*/
 									// Response::new(StatusCode::BadRequest, None).send(&mut stream);
-									Response::new(StatusCode::BadRequest, None)
+									
+									// ! L55 Using Custom Traits
+									// Response::new(StatusCode::BadRequest, None)
+									handler.handle_bad_request(&e)
 
 
 								}
