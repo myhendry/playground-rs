@@ -4,6 +4,11 @@ use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::error::Error;
 use super::method::{Method, MethodError};
 use super::{QueryString, QueryStringValue};
+
+/*
+	std::{fmt, convert, str, error }
+*/
+
 #[derive(Debug)]
 pub struct Request<'buf> {
 	path: &'buf str,
@@ -12,7 +17,7 @@ pub struct Request<'buf> {
 }
 
 impl<'buf> Request<'buf> {
-	// getters
+	// ! L56 Implementing Getters
 	pub fn path(&self) -> &str {
 		&self.path
 	}
@@ -25,7 +30,7 @@ impl<'buf> Request<'buf> {
 		// ! L56
 		// Converts from &Option<T> to Option<&T>.
 		// using as_ref() in this case makes it more flexible as we are interested only in the reference to the QueryString
-		// and not &Option<QueryString>
+		// we use as_ref because what we are is Option<&QueryString> and not &Option<QueryString>
 		self.query_string.as_ref()
 	}
 }
@@ -56,6 +61,9 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 				Err(e) => return Err(e),
 			}
 		*/
+		/*
+			pub fn from_utf8(v: &[u8]) -> Result<&str, Utf8Error>
+		*/
 		let request = str::from_utf8(buf)?;
 		/*
 		Transforms the Option<T> into a Result<T, E>, mapping Some(v) to Ok(v) and None to Err(err).
@@ -68,6 +76,9 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 				Some((method, request)) => {},
 				None => return Err(ParseError::InvalidRequest),
 			}
+		*/
+		/*
+			Transforms the Option<T> into a Result<T, E>, mapping Some(v) to Ok(v) and None to Err(err).
 		*/
 		let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
 		let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;

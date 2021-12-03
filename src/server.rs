@@ -87,13 +87,11 @@ impl Server {
 							// Specifying a lifetime does not allow us to choose how long a value will live
 							let response = match Request::try_from(&buffer[..]) {
 								Ok(request) => {
-									
-
 									// Here is write! to the stream
 									// For response to implement the write macro to write to the stream, 
 									// it needs to implement the Display Trait
 									// write!(TARGET, PLACEHOLDER,CONTENT);  
-									//write!(stream, "{}", response);
+									// write!(stream, "{}", response);
 									 
 									// Both below methods return an IoResult which needs to be handled
 									// It would be nicer if they can be handled together and no need to duplicate
