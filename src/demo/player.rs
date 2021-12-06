@@ -1,13 +1,16 @@
+#[derive(Debug)]
 pub struct Player<'a> {
 	name: &'a str,
 	body: Option<String>,
+	age: u32,
 }
 
 impl<'a> Player<'a> {
-	pub fn new(_name: &'a str, _body: Option<String>) -> Self {
+	pub fn new(_name: &'a str, _body: Option<String>, _age: u32) -> Self {
 		Self {
 			name: _name,
 			body: _body,
+			age: _age,
 		}
 	}
 
@@ -17,6 +20,11 @@ impl<'a> Player<'a> {
 			None => "",
 		};
 		z
+	}
+
+	pub fn amend(&'a mut self) {
+		self.age = 100;
+		
 	}
 }
 

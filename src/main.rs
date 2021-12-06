@@ -45,7 +45,11 @@ fn main() {
     //let r2 = Request2{path: "http://localhost:4000", query_string: Some("hello".to_string()), method: Method2::GET};
     //println!("r2 {:?}", r2)
 
-    let s1 = Server2::new("Testing".to_string());
-    s1.run();
+    // let s1 = Server2::new("127.0.0.1:3000".to_string());
+    // s1.run();
+
+    let mut p2 = Player::new("Jeremy", Some("Chris".to_string()), 32);
+    // p2.amend();
+    // println!("{:?}", p2);
 }
 
