@@ -45,11 +45,16 @@ fn main() {
     //let r2 = Request2{path: "http://localhost:4000", query_string: Some("hello".to_string()), method: Method2::GET};
     //println!("r2 {:?}", r2)
 
-    // let s1 = Server2::new("127.0.0.1:3000".to_string());
-    // s1.run();
+    // ! Server 2
+    let s1 = Server2::new("127.0.0.1:3000".to_string());
+    s1.run();
 
-    let mut p2 = Player::new("Jeremy", Some("Chris".to_string()), 32);
-    // p2.amend();
+    // ! https://stackoverflow.com/questions/62231909/borrowing-mutable-struct-with-fields
+    // let mut p2 = Player::new("Jeremy", Some("Chris".to_string()), 32, "John".to_string());
+    // p2.profile.amend(20, "Ali");
+    // p2.profile.amend(200, "Xavier");
+    // p2.profile.amend(2000, "Thor");
+
     // println!("{:?}", p2);
 }
 

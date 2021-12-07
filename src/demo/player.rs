@@ -2,15 +2,32 @@
 pub struct Player<'a> {
 	name: &'a str,
 	body: Option<String>,
+	pub profile: Profile,
+}
+
+#[derive(Debug)]
+pub struct Profile {
 	age: u32,
+	nickname: String,
+}
+
+impl Profile {
+	pub fn amend(& mut self, new_age: u32, new_nickname: &str) {
+		self.age = new_age;
+		self.nickname =  format!("{} {}", self.nickname, new_nickname);
+		
+	}
 }
 
 impl<'a> Player<'a> {
-	pub fn new(_name: &'a str, _body: Option<String>, _age: u32) -> Self {
+	pub fn new(_name: &'a str, _body: Option<String>, _age: u32, _nickname: String) -> Self {
 		Self {
 			name: _name,
 			body: _body,
-			age: _age,
+			profile: Profile {
+				age: _age,
+				nickname: _nickname,
+			},
 		}
 	}
 
@@ -22,10 +39,7 @@ impl<'a> Player<'a> {
 		z
 	}
 
-	pub fn amend(&'a mut self) {
-		self.age = 100;
-		
-	}
+	
 }
 
 pub struct Teacher<'a> {
