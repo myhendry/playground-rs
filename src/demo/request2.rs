@@ -79,12 +79,47 @@ pub struct Request2<'a> {
 			the following implementations were found:
 			<ParseError2 as From<Utf8Error>>
 			required because of the requirements on the impl of `FromResidual<Result<Infallible, MethodError2>>` for `Result<Request2<'_>, ParseError2>`
+
+			Convert Method String to Method Enum. Because use trait FromStr, we get parse() method for free
 		*/
 		// todo why involve the ParseError2 here and not just MethodError2?
 		// because in this case, this function's Error Type is ParseError2 and not MethodError2
 		// hence need to convert MethodError2 to ParseError2
-		// todo use ? to 'unwrap' Result?	
+		// todo is it always use ? to 'unwrap' Result?	
 		let method: Method2 = method.parse()?;
+
+		let mut query_string = None;
+
+
+        // !Verbose Way 3: Unnecessary to have the None arm since it returns an empty () anyway 3
+        // match path.find('?') {
+        //     Some(i) => {
+        //         query_string = Some(&path[i+1..]);
+        //         path = &path[..i];
+        //     },
+        //     None => {},
+        // }
+        
+        // !Verbose Way 3: Better way compared to above but still verbose 3
+        // let q = path.find('?');
+        // if q.is_some() {
+        //     let i = q.unwrap();
+        //     query_string = Some(&path[i+1..]);
+        //     path = &path[..i]; 
+        // }
+
+        // !Better Way 3: since care only about a single variant of it
+        if let Some(i) = path.find('?') {
+                query_string = Some(QueryString::from(&path[i + 1..]));
+                path = &path[..i];
+        }
+
+        Ok(Self {
+            path,
+            query_string,
+            method,
+        })
+
 
 	}
 }

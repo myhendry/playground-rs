@@ -58,10 +58,10 @@ impl Server2 {
 
 							*/
 							// *3 Convert Buffer into Request
-							// match Request2::try_from(&buffer[..]) {
-							// 	Ok(request) => {},
-							// 	Err(e) => println!("{:?}", e),
-							// }
+							match Request2::try_from(&buffer[..]) {
+								Ok(request) => {},
+								Err(e) => println!("{:?}", e),
+							}
 							
 						},
 						Err(e) => println!("{:?}", e)
