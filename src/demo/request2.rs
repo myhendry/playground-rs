@@ -1,9 +1,9 @@
-use std::{error::Error, fmt::{Display, Debug, Formatter, Result as FmtResult}, convert::TryFrom, str::{Utf8Error, FromStr}};
+use std::{error::Error, fmt::{Display, Debug, Formatter, Result as FmtResult}, convert::TryFrom, str::{Utf8Error, FromStr}, collections::HashMap};
 
 #[derive(Debug)]
 pub struct Request2<'a> {
 	pub path: &'a str,
-	pub query_string: Option<String>,
+	pub query_string: Option<QueryString<'a>>,
 	pub method: Method2,
 }
 
@@ -110,6 +110,7 @@ pub struct Request2<'a> {
 
         // !Better Way 3: since care only about a single variant of it
         if let Some(i) = path.find('?') {
+		// GET /search?name=abc&sort=1 HTTP/1.1\r\n...HEADERS...
                 query_string = Some(QueryString::from(&path[i + 1..]));
                 path = &path[..i];
         }
@@ -119,8 +120,6 @@ pub struct Request2<'a> {
             query_string,
             method,
         })
-
-
 	}
 }
 	
@@ -238,7 +237,56 @@ impl FromStr for Method2 {
 }
 
 // todo why use an empty struct here?
+// so that can impl FromStr Trait in order to
+// convert type &str to Enum Type
 pub struct MethodError2;
 
+#[derive(Debug)]
+pub struct QueryString<'a> {
+	data: HashMap<&'a str, Value<'a>>,
+}
 
+impl<'a> QueryString<'a> {
+	// todo where is this get method being used?
+	pub fn get(&self, key: &str) -> Option<&Value> {
+		self.data.get(key)
+	}
+}
 
+#[derive(Debug)]
+pub enum Value<'a> {
+	Single(&'a str),
+	Multiple(Vec<&'a str>),
+}
+
+// FromStr cannot pass references thus cannot use FromStr; hence in this case use From
+impl<'a> From<&'a str> for QueryString<'a> {
+	// From Trait cannot fail hence no Error option
+	fn from(s: &'a str) -> Self {
+		let mut data = HashMap::new();
+		// GET /search?name=abc&sort=1 HTTP/1.1\r\n...HEADERS...
+		for sub_str in s.split('&') {
+			let mut key = sub_str;
+			let mut val = "";
+			if let Some(i) = sub_str.find("=") {
+				key = &sub_str[..i];
+				val = &sub_str[i + 1..];
+			}
+
+			data.entry(key).and_modify(|existing| match existing {
+				Value::Single(prev_val) => {
+					// let mut vec = Vec::new();
+					// vec.push(val);
+					// vec.push(prev_val);
+
+					// let mut vec = vec![prev_val, val];
+					// existing = Value::Multiple(vec![]) 
+					
+					*existing = Value::Multiple(vec![prev_val, val]);
+				}
+				Value::Multiple(vec) => vec.push(val)
+			}).or_insert(Value::Single(val));
+		}
+		QueryString { data }
+	}
+}

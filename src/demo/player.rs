@@ -63,6 +63,6 @@ impl<'a> Teacher<'a> {
 	pub fn hey(&self) -> String {
 		format!("Hey! {}", self.name)
 	}
-
-
 }
+
+

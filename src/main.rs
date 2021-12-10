@@ -10,7 +10,7 @@ mod website_handler;
 mod server2;
 mod demo;
 
-use std::env;
+use std::{env, collections::HashMap};
 use server::Server;
 use website_handler::WebsiteHandler;
 
@@ -46,8 +46,8 @@ fn main() {
     //println!("r2 {:?}", r2)
 
     // ! Server 2
-    let s1 = Server2::new("127.0.0.1:3000".to_string());
-    s1.run();
+    // let s1 = Server2::new("127.0.0.1:3000".to_string());
+    // s1.run();
 
     // ! https://stackoverflow.com/questions/62231909/borrowing-mutable-struct-with-fields
     // let mut p2 = Player::new("Jeremy", Some("Chris".to_string()), 32, "John".to_string());
@@ -56,5 +56,21 @@ fn main() {
     // p2.profile.amend(2000, "Thor");
 
     // println!("{:?}", p2);
+
+    // ! HaspMaps
+    let mut hm1 = HashMap::new();
+    hm1.insert("1", "google");
+    hm1.insert("2","meta");
+    hm1.insert("3", "microsoft");
+    println!("{:?}", hm1);
+
+    // Unwrapping Option<&&str> other than using unwrap
+    let v1 = hm1.get("2");
+    println!("{:?}", v1.unwrap());
+
+    println!("{}", hm1.len());
+
+    
+    
 }
 
