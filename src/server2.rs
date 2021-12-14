@@ -1,6 +1,16 @@
 use std::{net::TcpListener, io::Read, convert::TryFrom};
 
-use crate::demo::Request2;
+use crate::demo::{Request2, request2::{ParseError2, Response2, StatusCode2}};
+
+// pub trait Handler2 {
+// 	fn handle_request(&self, request: &Request2) -> Response2;
+
+// 	// Using Default but can be overrided
+// 	fn handle_bad_request(&mut self, e: &ParseError2) -> Response {
+// 		println!("Failed to parse request: {}", e);
+// 		Response::new(StatusCode2::BadRequest, None)
+// 	}
+// }
 
 pub struct Server2 {
 	// todo ok to use &str in this case?
@@ -58,9 +68,26 @@ impl Server2 {
 
 							*/
 							// *3 Convert Buffer into Request
-							match Request2::try_from(&buffer[..]) {
-								Ok(request) => {},
-								Err(e) => println!("{:?}", e),
+							let response = match Request2::try_from(&buffer[..]) {
+								Ok(request) => {
+									// handler.handle_request(&request)
+									Response2::new(StatusCode2::Ok, Some("hi".to_string()))
+								},
+								Err(e) => {
+									// handler.handle_bad_request(&e)
+									Response2::new(StatusCode2::BadRequest, None)
+								}
+								
+							};
+
+							/*
+								A specialized [Result] type for I/O operations.
+								This type is broadly used across [std::io] for any operation which may produce an error.
+								This typedef is generally used to avoid writing out [io::Error] directly and is otherwise a direct mapping to [Result].
+	
+							*/
+							if let Err(e) = response.send(&mut stream) {
+								println!("Failed to send response: {}", e);
 							}
 							
 						},

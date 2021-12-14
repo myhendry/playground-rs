@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::{Display, Debug, Formatter, Result as FmtResult}, convert::TryFrom, str::{Utf8Error, FromStr}, collections::HashMap};
+use std::{error::Error, fmt::{Display, Debug, Formatter, Result as FmtResult, write}, convert::TryFrom, str::{Utf8Error, FromStr}, collections::HashMap, io::{Write, Result as IoResult}};
 
 #[derive(Debug)]
 pub struct Request2<'a> {
@@ -7,6 +7,11 @@ pub struct Request2<'a> {
 	pub method: Method2,
 }
 
+/*
+	Simple and safe type conversions that may fail in a controlled way under some circumstances.
+	Type -> Type
+	It also provides an auto implementation of TryInto.
+*/
  impl<'a> TryFrom<&'a [u8]> for Request2<'a> {
 	type Error = ParseError2;
 
@@ -260,6 +265,8 @@ pub enum Value<'a> {
 }
 
 // FromStr cannot pass references thus cannot use FromStr; hence in this case use From
+// str -> Type
+// Implement it to be used by str::parse
 impl<'a> From<&'a str> for QueryString<'a> {
 	// From Trait cannot fail hence no Error option
 	fn from(s: &'a str) -> Self {
@@ -290,3 +297,74 @@ impl<'a> From<&'a str> for QueryString<'a> {
 		QueryString { data }
 	}
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum StatusCode2 {
+	Ok = 200,
+	BadRequest = 400,
+	NotFound = 404,
+}
+
+//todo why is self in this case Self::Ok and not 200?
+impl StatusCode2 {
+	pub fn reason_phrase(&self) -> &str {
+		match self {
+			Self::Ok => "OK",
+			Self::BadRequest => "Bad Request",
+			Self::NotFound => "Not Found",
+		}
+	}
+}
+
+//todo why implement Display in this case?
+//todo self in this case is Self::Ok/Self::BadRequest/Self::NotFound? or 200/400/404
+impl Display for StatusCode2 {
+	fn fmt(&self, f: &mut Formatter) -> FmtResult {
+		/*
+			cannot move out of `*self` which is behind a shared reference
+			move occurs because `*self` has type `StatusCode2`, which does not implement the `Copy` trait
+		*/
+		write!(f, "{}", *self as u16)
+	}
+}
+
+
+
+#[derive(Debug)]
+pub struct Response2 {
+	status_code: StatusCode2,
+	body: Option<String>,
+}
+
+impl Response2 {
+	pub fn new(status_code: StatusCode2, body: Option<String>) -> Self {
+		Self {
+			status_code,
+			body,
+		}
+	}
+
+	/*
+	A specialized [Result] type for I/O operations.
+	This type is broadly used across [std::io] for any operation which may produce an error.
+	This typedef is generally used to avoid writing out [io::Error] directly and is otherwise a direct mapping to [Result].
+	
+	missing generics for type alias `std::io::Result` expected 1 generic argument
+	
+	mismatched types expected enum `Result<(), std::io::Error>` found unit type `()`
+	*/
+	pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
+		//todo when to use &self.body vs self.body?
+		//use String coercion to coerce to &str
+		let body = match &self.body {
+			Some(body) => body,
+			None => "",
+		};
+
+		write!(stream, "HTTP://1.1 {} {}\r\n\r\n{}", self.status_code, self.status_code.reason_phrase(), body)
+
+
+	}
+}
+
+
