@@ -2,15 +2,15 @@ use std::{net::TcpListener, io::Read, convert::TryFrom};
 
 use crate::demo::{Request2, request2::{ParseError2, Response2, StatusCode2}};
 
-// pub trait Handler2 {
-// 	fn handle_request(&self, request: &Request2) -> Response2;
+pub trait Handler2 {
+	fn handle_request(&self, request: &Request2) -> Response2;
 
-// 	// Using Default but can be overrided
-// 	fn handle_bad_request(&mut self, e: &ParseError2) -> Response {
-// 		println!("Failed to parse request: {}", e);
-// 		Response::new(StatusCode2::BadRequest, None)
-// 	}
-// }
+	// Using Default but can be overrided
+	fn handle_bad_request(&mut self, e: &ParseError2) -> Response2 {
+		println!("Failed to parse request: {}", e);
+		Response2::new(StatusCode2::BadRequest, None)
+	}
+}
 
 pub struct Server2 {
 	// todo ok to use &str in this case?
@@ -26,7 +26,7 @@ impl Server2 {
 	}
 
 	// todo why not &self in this case?
-	pub fn run(self) {
+	pub fn run(self, mut handler: impl Handler2) {
 		println!("{:?}", self.addr);
 
 		// todo why use &self in this case? why can't use &self at run(&self) and use self here
@@ -70,12 +70,20 @@ impl Server2 {
 							// *3 Convert Buffer into Request
 							let response = match Request2::try_from(&buffer[..]) {
 								Ok(request) => {
-									// handler.handle_request(&request)
-									Response2::new(StatusCode2::Ok, Some("hi".to_string()))
+									// dbg!(_request);
+									// ! Not using Traits
+									// Response2::new(StatusCode2::Ok, Some("hi".to_string()))
+									
+									// ! Using Traits
+									handler.handle_request(&request)
 								},
 								Err(e) => {
-									// handler.handle_bad_request(&e)
-									Response2::new(StatusCode2::BadRequest, None)
+									// ! Not using Trait
+									// println!("Failed to parse request: {}", e);
+									//Response2::new(StatusCode2::BadRequest, None);
+									
+									// ! Using Traits
+									handler.handle_bad_request(&e)
 								}
 								
 							};

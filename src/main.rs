@@ -3,12 +3,13 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
-mod server;
 mod http;
+mod server;
 mod website_handler;
 
-mod server2;
 mod demo;
+mod server2;
+mod website_handler2;
 
 use std::{env, collections::HashMap};
 use server::Server;
@@ -16,6 +17,7 @@ use website_handler::WebsiteHandler;
 
 use demo::{Player, Teacher, Request2, Method2};
 use server2::{Server2};
+use website_handler2::WebsiteHandler2;
 
 fn main() {
     // let request = Request{method: "ali", path: "http://1", query_string: "xxx"};
@@ -58,18 +60,30 @@ fn main() {
     // println!("{:?}", p2);
 
     // ! HaspMaps
-    let mut hm1 = HashMap::new();
-    hm1.insert("1", "google");
-    hm1.insert("2","meta");
-    hm1.insert("3", "microsoft");
-    println!("{:?}", hm1);
+  //let mut hm1 = HashMap::new();
+    // hm1.insert("1", "google");
+    // hm1.insert("2","meta");
+    // hm1.insert("3", "microsoft");
+    // println!("{:?}", hm1);
 
-    // Unwrapping Option<&&str> other than using unwrap
-    let v1 = hm1.get("2");
-    println!("{:?}", v1.unwrap());
+    // // Unwrapping Option<&&str> other than using unwrap
+    // let v1 = hm1.get("2");
+    // println!("{:?}", v1.unwrap());
 
-    println!("{}", hm1.len());
+    // println!("{}", hm1.len());
 
+        /*
+    1. Listen
+    2. HTTP Parse
+    3. Handle
+    */
+    // env! is a macro that reads environment variables at compile time
+    let default_path = format!("{}/public", env!("CARGO_MANIFEST_DIR"));
+    // env::var reads environment variables at run time
+    let public_path = env::var("PUBLIC_PATH").unwrap_or(default_path);
+    println!("{}", public_path);
+    let server = Server2::new("127.0.0.1:8080".to_string());
+    server.run(WebsiteHandler2::new(public_path));    
     
     
 }

@@ -3,8 +3,22 @@ use std::{error::Error, fmt::{Display, Debug, Formatter, Result as FmtResult, wr
 #[derive(Debug)]
 pub struct Request2<'a> {
 	pub path: &'a str,
-	pub query_string: Option<QueryString<'a>>,
+	pub query_string: Option<QueryString2<'a>>,
 	pub method: Method2,
+}
+
+impl<'a> Request2<'a> {
+	pub fn path(&self) -> &str {
+		self.path
+	}
+
+	pub fn method(&self) -> &Method2 {
+		&self.method
+	}
+
+	pub fn query_string(&self) -> Option<&QueryString2<'a>> {
+		self.query_string.as_ref()
+	}
 }
 
 /*
@@ -116,7 +130,7 @@ pub struct Request2<'a> {
         // !Better Way 3: since care only about a single variant of it
         if let Some(i) = path.find('?') {
 		// GET /search?name=abc&sort=1 HTTP/1.1\r\n...HEADERS...
-                query_string = Some(QueryString::from(&path[i + 1..]));
+                query_string = Some(QueryString2::from(&path[i + 1..]));
                 path = &path[..i];
         }
 
@@ -247,11 +261,11 @@ impl FromStr for Method2 {
 pub struct MethodError2;
 
 #[derive(Debug)]
-pub struct QueryString<'a> {
+pub struct QueryString2<'a> {
 	data: HashMap<&'a str, Value<'a>>,
 }
 
-impl<'a> QueryString<'a> {
+impl<'a> QueryString2<'a> {
 	// todo where is this get method being used?
 	pub fn get(&self, key: &str) -> Option<&Value> {
 		self.data.get(key)
@@ -267,7 +281,7 @@ pub enum Value<'a> {
 // FromStr cannot pass references thus cannot use FromStr; hence in this case use From
 // str -> Type
 // Implement it to be used by str::parse
-impl<'a> From<&'a str> for QueryString<'a> {
+impl<'a> From<&'a str> for QueryString2<'a> {
 	// From Trait cannot fail hence no Error option
 	fn from(s: &'a str) -> Self {
 		let mut data = HashMap::new();
@@ -294,7 +308,7 @@ impl<'a> From<&'a str> for QueryString<'a> {
 				Value::Multiple(vec) => vec.push(val)
 			}).or_insert(Value::Single(val));
 		}
-		QueryString { data }
+		QueryString2 { data }
 	}
 }
 
@@ -317,6 +331,7 @@ impl StatusCode2 {
 }
 
 //todo why implement Display in this case?
+//in order to use self.status_code with write! macro
 //todo self in this case is Self::Ok/Self::BadRequest/Self::NotFound? or 200/400/404
 impl Display for StatusCode2 {
 	fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -361,6 +376,7 @@ impl Response2 {
 			None => "",
 		};
 
+		//todo what is returned in self.status_code? return StatusCode2::OK or 200 or "OK"?
 		write!(stream, "HTTP://1.1 {} {}\r\n\r\n{}", self.status_code, self.status_code.reason_phrase(), body)
 
 
