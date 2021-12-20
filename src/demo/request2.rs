@@ -2,11 +2,14 @@ use std::{error::Error, fmt::{Display, Debug, Formatter, Result as FmtResult, wr
 
 #[derive(Debug)]
 pub struct Request2<'a> {
+	// pass in buffer
+	// GET /search?name=abc&sort=1 HTTP/1.1
 	pub path: &'a str,
 	pub query_string: Option<QueryString2<'a>>,
 	pub method: Method2,
 }
 
+// getters and setters
 impl<'a> Request2<'a> {
 	pub fn path(&self) -> &str {
 		self.path
@@ -25,6 +28,8 @@ impl<'a> Request2<'a> {
 	Simple and safe type conversions that may fail in a controlled way under some circumstances.
 	Type -> Type
 	It also provides an auto implementation of TryInto.
+
+	Try to convert Byte Array (Buffer) into Request
 */
  impl<'a> TryFrom<&'a [u8]> for Request2<'a> {
 	type Error = ParseError2;
@@ -32,6 +37,15 @@ impl<'a> Request2<'a> {
 	// pass in buffer
 	// GET /search?name=abc&sort=1 HTTP/1.1
     	// TryFrom Trait CAN fail hence may return error that needs to be handled unlike From Trait
+
+	/*
+		The type that consists of a pointer and length is &[u8].
+		What is a type? I think of types as a property a region of memory may or may not have, and that these properties are something you can prove to be true at compile time.
+		If you know that a region of memory has type u32, you know that the region has length 4. You also know that you can read the memory, i.e. it can't be deallocated.
+		If you know that a region of memory has type &u32, you know that it has size 8. You also know that if you interpret the bytes as a pointer and dereference it, you will find a region of memory of type u32. This means that e.g. you know that the 8 bytes are not all zeros, because then you could not dereference it and find an u32, as the zero address is not allocated.
+		If you know that a region of memory has type [u8], you know that it contains a sequence of values of type u8 of some length. This type does not enforce any length on the region you make the claim about. Since the u8 type requires the memory to be allocated, you in turn know this about the entire region.
+		If a region of memory has type &[u8], you know that this region has length 16 bytes, and that the region starts out with a pointer followed by an usize. Additionally, you know that the other region starting at the pointer and having the specified length must have the type [u8], which e.g. means that you know that the memory is allocated.
+	*/   
 	fn try_from(buf: &'a [u8]) -> Result<Self, Self::Error> {
 		// below is same as above and is what is returned with a lifetime 'buf
     		// fn try_from(buf: &'buf [u8]) -> Result<Request<'buf>, Self::Error> { ...
@@ -62,7 +76,10 @@ impl<'a> Request2<'a> {
 		// ! Succint Way 1
  		let request = std::str::from_utf8(buf)?;
 
- 		// GET /search?name=abc&sort=1 HTTP/1.1\r\n...HEADERS...
+		// todo Difference with below approach as both return &str
+         	// let k =  std::str::from_utf8(buf).or(Err(ParseError2::InvalidEncoding))?;
+ 		
+		 // GET /search?name=abc&sort=1 HTTP/1.1\r\n...HEADERS...
  		/*
 			fn get_next_word(request: &str) -> Option<(&str, &str)>
 			let z: Option<(&str, &str)> = get_next_word(request);
@@ -78,6 +95,7 @@ impl<'a> Request2<'a> {
 	        //     None => return Err(ParseError::InvalidRequest),
 	        // };
 		// ! Succint Way 2
+		// ok_or() will convert Type Option into Type Result
 		let (method, request) = get_next_word(request).ok_or(ParseError2::InvalidRequest)?;
 		let (mut path, request) = get_next_word(request).ok_or(ParseError2::InvalidRequest)?;
 		let (protocol, _) = get_next_word(request).ok_or(ParseError2::InvalidRequest)?;
@@ -105,6 +123,7 @@ impl<'a> Request2<'a> {
 		// because in this case, this function's Error Type is ParseError2 and not MethodError2
 		// hence need to convert MethodError2 to ParseError2
 		// todo is it always use ? to 'unwrap' Result?	
+		// turbofish
 		let method: Method2 = method.parse()?;
 
 		let mut query_string = None;
@@ -184,6 +203,10 @@ impl ParseError2 {
 // By implementing this Error Trait, it will force us to implement the Debug and Display Trait which is a good practise
 impl<'a> Error for ParseError2 {}
 
+/*
+	{} for the Display formatter
+	std::fmt::Result as FmtResult;
+*/
 impl<'a> Display for ParseError2 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		// write!(&mut w, "formatted {}", "arguments")?;
@@ -193,6 +216,9 @@ impl<'a> Display for ParseError2 {
 
 /*
 	implement the missing item: `fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), std::fmt::Error> { todo!() }`: `fn fmt(&self, _: &mut Formatter<'_>) -> Result<(), std::fmt::Error> { todo!() }
+
+	{:?} for the Debug formatter
+	std::fmt::Result as FmtResult;
 */
 impl<'a> Debug for ParseError2 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
@@ -278,17 +304,20 @@ pub enum Value<'a> {
 	Multiple(Vec<&'a str>),
 }
 
-// FromStr cannot pass references thus cannot use FromStr; hence in this case use From
+// FromStr cannot pass references that use lifetimes thus cannot use FromStr; hence in this case use From
 // str -> Type
 // Implement it to be used by str::parse
 impl<'a> From<&'a str> for QueryString2<'a> {
 	// From Trait cannot fail hence no Error option
+	// Convert string slice &str to QueryString
+	// In this case, we use From rather than TryFrom because this conversion cannot fail
+	// It always can convert a string slice to QueryString
 	fn from(s: &'a str) -> Self {
 		let mut data = HashMap::new();
 		// GET /search?name=abc&sort=1 HTTP/1.1\r\n...HEADERS...
 		for sub_str in s.split('&') {
 			let mut key = sub_str;
-			let mut val = "";
+			let mut val = ""; // use "" in this case because can have c= without any value rather than c=fadsf
 			if let Some(i) = sub_str.find("=") {
 				key = &sub_str[..i];
 				val = &sub_str[i + 1..];
@@ -296,13 +325,12 @@ impl<'a> From<&'a str> for QueryString2<'a> {
 
 			data.entry(key).and_modify(|existing| match existing {
 				Value::Single(prev_val) => {
+					// ! Approach 2A
 					// let mut vec = Vec::new();
 					// vec.push(val);
 					// vec.push(prev_val);
-
-					// let mut vec = vec![prev_val, val];
-					// existing = Value::Multiple(vec![]) 
-					
+			
+					// ! Approach 2
 					*existing = Value::Multiple(vec![prev_val, val]);
 				}
 				Value::Multiple(vec) => vec.push(val)

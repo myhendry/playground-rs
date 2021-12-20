@@ -72,19 +72,47 @@ fn main() {
 
     // println!("{}", hm1.len());
 
-        /*
+    /*
+    ! Main   
     1. Listen
     2. HTTP Parse
     3. Handle
     */
     // env! is a macro that reads environment variables at compile time
-    let default_path = format!("{}/public", env!("CARGO_MANIFEST_DIR"));
-    // env::var reads environment variables at run time
-    let public_path = env::var("PUBLIC_PATH").unwrap_or(default_path);
-    println!("{}", public_path);
-    let server = Server2::new("127.0.0.1:8080".to_string());
-    server.run(WebsiteHandler2::new(public_path));    
+    // let default_path = format!("{}/public", env!("CARGO_MANIFEST_DIR"));
+    // // env::var reads environment variables at run time
+    // // todo where does the PUBLIC_PATH appear?
+    // let public_path = env::var("PUBLIC_PATH").unwrap_or(default_path);
+    // // println!("{}", public_path);
+    // // todo why not use &str in this case rather than String??
+    // let server = Server2::new("127.0.0.1:8080".to_string());
+    // server.run(WebsiteHandler2::new(public_path));    
     
-    
+    // let s1 = "apple";
+    // let s2 = &s1[1..=4];
+    // println!("{}", s2);    
+    // dbg!(s2);
+
+    // let a1 = [10, 20, 30];
+    // let a2 = &a1[..2];
+    // println!("{:?}", a2);
+
+    // let mut v1 = vec![1, 2, 3];
+    // v1.push(4);
+    // println!("{:?}", v1);
+
+    let a1 = [1, 2, 3, 4, 5];
+    accept_arr1(&a1); // OK
+    accept_arr2(&a1); // OK
+    accept_arr2(&a1[1..3]); // OK
+    //&[u8] //byte slice
+
 }
 
+fn accept_arr1(a: &[i32; 5]) {
+  println!("{:?}", a);
+}
+
+fn accept_arr2(a: &[i32]) {
+  println!("{:?}", a);
+}

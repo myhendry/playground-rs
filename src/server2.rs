@@ -26,6 +26,7 @@ impl Server2 {
 	}
 
 	// todo why not &self in this case?
+	// it does not matter in this case as we are not using struct Server after the run function. Hence, its okay for run to take ownership of struct Server
 	pub fn run(self, mut handler: impl Handler2) {
 		println!("{:?}", self.addr);
 
@@ -34,21 +35,35 @@ impl Server2 {
 
 		loop {
 			/*
+				! Possible Way but not the best way to handle enum variable in rust
+				but not appropriate if there are many arms
+			*/
+			// let res = listener.accept();
+
+			// if res.is_err() {
+			// 	continue;
+			// }
+
+			// let (stream, addr) = res.unwrap();
+			/*
 				stream TcpStream { addr: 127.0.0.1:3000, peer: 127.0.0.1:51517, fd: 4 } 
 				addr 127.0.0.1:51517
 			*/
  			// *1 Accept Listener -> Receive TcpStream & SocketAddr
 			match listener.accept() {
 
-				Ok((mut stream, addr)) => {
-					println!("stream {:?} addr {:?}",stream, addr);
+				Ok((mut stream, _)) => {
+					// TcpStream { addr: 127.0.0.1:8080, peer: 127.0.0.1:57270, fd: 4 } addr 127.0.0.1:57270
+					// println!("stream {:?} addr {:?}",stream, addr);
 					
 					let mut buffer = [0; 1024];
 					
 					// *2 TcpStream read mutable buffer
+					// Read is a Trait - to use the functionality of read, need to pull in the Read Trait
 					match stream.read(& mut buffer) {
 						Ok(_) => {
 							// todo difference between utf8 vs utf16
+							// GET /style.css HTTP/1.1
 							println!("Received a request {}", String::from_utf8_lossy(&buffer));
 
 							/*
@@ -68,6 +83,7 @@ impl Server2 {
 
 							*/
 							// *3 Convert Buffer into Request
+							// either return a Request if successful or a ParseError if unsuccessful
 							let response = match Request2::try_from(&buffer[..]) {
 								Ok(request) => {
 									// dbg!(_request);
@@ -77,6 +93,7 @@ impl Server2 {
 									// ! Using Traits
 									handler.handle_request(&request)
 								},
+								// try_from Error
 								Err(e) => {
 									// ! Not using Trait
 									// println!("Failed to parse request: {}", e);
@@ -99,6 +116,7 @@ impl Server2 {
 							}
 							
 						},
+						// readstream Error
 						Err(e) => println!("{:?}", e)
 					}
 				},

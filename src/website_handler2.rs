@@ -40,7 +40,7 @@ impl Handler2 for WebsiteHandler2 {
 				// "/" => Response::new(StatusCode::Ok, Some("<h1>Welcome</h1>".to_string())),
 				"/" => Response2::new(StatusCode2::Ok, self.read_file("index.html")),
 				// "/hello" => Response::new(StatusCode::Ok, Some("<h1>Hello</h1>".to_string())),
-				"/hello" => Response2::new(StatusCode2::Ok, self.read_file("about.html")),
+				"/hello" => Response2::new(StatusCode2::Ok, self.read_file("hello.html")),
 				// _ => Response::new(StatusCode::NotFound, None),	
 				path => match self.read_file(path) {
 					Some(contents) => Response2::new(StatusCode2::Ok, Some(contents)), 
